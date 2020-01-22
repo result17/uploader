@@ -43,28 +43,17 @@ const Uploader: React.FC = ():React.ReactElement => {
       dispatch({type: 'fileUploadedSatusChanged'})
       return
     }
+    // 空数组也为true
     if (uploadedList) {
       const chunkListDatainit: Array<ChunkData> = fileChunkList.map((fileChunk: BlobObj, index: number): ChunkData => {
-        let chunkHash: string = `${state.container.hash}-${index}`
+        let chunkHash: string = `${hash}-${index}`
         return {
-          fileHash: state.container.hash,
+          fileHash: hash,
           index,
           hash: chunkHash,
           chunk: fileChunk.file,
           size: fileChunk.file.size,
           percentage: uploadedList.includes(chunkHash) ? 100 : 0
-        }
-      })
-      dispatch({type: 'chunkListInit', chunkListData: chunkListDatainit})
-    } else {
-      const chunkListDatainit: Array<ChunkData> = fileChunkList.map((fileChunk: BlobObj, index: number): ChunkData => {
-        return {
-          fileHash: state.container.hash,
-          index,
-          hash: state.container.hash + '-' + index,
-          chunk: fileChunk.file,
-          size: fileChunk.file.size,
-          percentage: 0
         }
       })
       dispatch({type: 'chunkListInit', chunkListData: chunkListDatainit})
