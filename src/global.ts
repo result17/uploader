@@ -14,6 +14,7 @@ interface Action {
   worker?: Worker,
   percentage?: number | undefined,
   chunkListData?: Array<ChunkData>,
+  hash?: string,
 }
 
 interface State {
@@ -46,7 +47,7 @@ interface formDataObj {
   index: number,
 }
 
-declare const PIECES: 10
+const PIECES = 10
 
 const WAIT = 'wait'
 const PAUSE = 'pause'

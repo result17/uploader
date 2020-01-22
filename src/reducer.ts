@@ -11,9 +11,15 @@ export default function reducer(state: State, action: Action): State {
     case 'uploadReset':
       return {...state, status: WAIT}
     case 'hashWorker':
-      let tempContainer: Container = {...state.container}
-      tempContainer.worker = action.worker
-      return {...state, container: tempContainer}
+      return {...state, container: {
+        ...state.container,
+        worker: action.worker
+      }}
+    case 'updateHash':
+      return {...state, container: {
+        ...state.container,
+        hash: action.hash as string
+      }}
     case 'updateHashPercentage':
       return {...state, hashPercentage: action.percentage}
     case 'fileUploadedSatusChanged':

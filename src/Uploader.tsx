@@ -30,31 +30,46 @@ const Uploader: React.FC = ():React.ReactElement => {
   }
   
 
-  // async function handleUpload(): Promise<any> {
-  //   if (!state.container.file) return Promise.reject()
-  //   const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file)
-  //   // hash值可以保存在local host中
-  //   let hash: string = await calHash(fileChunkList)
-  //   const { shouldUpload, uploadedList }= await verifyUpload(state.container.file.name, state.container.hash)
-  //   if (!shouldUpload) {
-  //     message.success("upload sucess!")
-  //     dispatch({type: 'fileUploadedSatusChanged'})
-  //     return
-  //   }
-  //   if (uploadedList) {
-  //     const chunkListDatainit: Array<ChunkData> = fileChunkList.map((fileChunk: BlobObj, index: number): ChunkData => {
-  //       return {
-  //         fileHash: state.container.hash,
-  //         index,
-  //         hash: state.container.hash + '-' + index,
-  //         chunk: fileChunk.file,
-  //         size: fileChunk.file.size,
-  //         percentage: uploadedList.includes(index) ? 100 : 0
-  //       }
-  //     })
-  //     dispatch({type: 'chunkListInit', chunkListData: chunkListDatainit})
-  //   }
-  // }
+  async function handleUpload(): Promise<any> {
+    if (!state.container.file) return Promise.reject()
+    const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file)
+    // hash值可以保存在local host中
+    let hash: string = await calHash(fileChunkList)
+    dispatch({type: 'updateHash', hash: hash})
+    const { shouldUpload, uploadedList }= await verifyUpload(state.container.file.name, hash)
+    // 服务器存在该文件
+    if (!shouldUpload) {
+      message.success("upload sucess!")
+      dispatch({type: 'fileUploadedSatusChanged'})
+      return
+    }
+    if (uploadedList) {
+      const chunkListDatainit: Array<ChunkData> = fileChunkList.map((fileChunk: BlobObj, index: number): ChunkData => {
+        let chunkHash: string = `${state.container.hash}-${index}`
+        return {
+          fileHash: state.container.hash,
+          index,
+          hash: chunkHash,
+          chunk: fileChunk.file,
+          size: fileChunk.file.size,
+          percentage: uploadedList.includes(chunkHash) ? 100 : 0
+        }
+      })
+      dispatch({type: 'chunkListInit', chunkListData: chunkListDatainit})
+    } else {
+      const chunkListDatainit: Array<ChunkData> = fileChunkList.map((fileChunk: BlobObj, index: number): ChunkData => {
+        return {
+          fileHash: state.container.hash,
+          index,
+          hash: state.container.hash + '-' + index,
+          chunk: fileChunk.file,
+          size: fileChunk.file.size,
+          percentage: 0
+        }
+      })
+      dispatch({type: 'chunkListInit', chunkListData: chunkListDatainit})
+    }
+  }
   
   
 
@@ -76,7 +91,7 @@ async function uploadChunks(container: Container,chunkDataList: Array<ChunkData>
   const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = requestFormDataList.map(formDataObj => {
     return request({
       method: 'post',
-      url: 'http://localhost:3000',
+      url: 'http://localhost:4000',
       data: formDataObj.formData,
     })
   })
@@ -88,7 +103,7 @@ async function uploadChunks(container: Container,chunkDataList: Array<ChunkData>
 async function mergeRequest(container: Container) {
   await request({
     method: 'post',
-    url: 'http://localhost:3000/merge',
+    url: 'http://localhost:4000/merge',
     headers: {
       'content-type': 'application/json'
     },
@@ -101,13 +116,9 @@ async function mergeRequest(container: Container) {
   dispatch({type: 'uploadReset'})
 }
 
-async function handleUpload(): Promise<any> { 
-
-}
-
 React.useEffect(() => {
   if (state.status === UPLOADING) {
-    
+    handleUpload()
   }
 }, [state.status])
   return (
@@ -117,7 +128,7 @@ React.useEffect(() => {
        format={():string | undefined => {
          if (state.status === WAIT) return 'start'
          else if (state.status === PAUSE) return '| |'
-         else return '...'
+         else return `${state.hashPercentage}%`
        }}/>
        <ButtonGroup>
           <Button 
@@ -135,7 +146,10 @@ React.useEffect(() => {
         </ButtonGroup>
        <input id="fileIn" 
          type="file" disabled={status === 'wait'} 
-         onChange={(e: React.ChangeEvent<HTMLInputElement>): void => dispatch({type: 'fileChange', event: e})}
+         onChange={(event: React.ChangeEvent<HTMLInputElement>): void => {
+          event.persist()
+          dispatch({type: 'fileChange', event: event})
+         }}
       />
     </div>
   )

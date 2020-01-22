@@ -22,15 +22,15 @@ async function mergeFileChunk(filePath: string, fileHash: string): Promise<void>
   // 创建文件
   await fse.writeFile(filePath, '')
   chunkPathAry.forEach(chunk => {
-    fse.appendFileSync(filePath, fse.readFileSync(`${chunkDir}/${chunk}`))
-    fse.unlinkSync(`${chunkDir}/${chunk}`)
+    fse.appendFileSync(filePath, fse.readFileSync(`${chunkDir}\\${chunk}`))
+    fse.unlinkSync(`${chunkDir}\\${chunk}`)
   })
   fse.rmdirSync(chunkDir)
 }
 
 
 async function createdUploadedList(fileHash: string): Promise<Array<string | void>> {
-  return fse.existsSync(`${UPLOAD_DIR}/${fileHash}`) ? await fse.readdir(`${UPLOAD_DIR}/${fileHash}`) : []
+  return fse.existsSync(`${UPLOAD_DIR}\\${fileHash}`) ? await fse.readdir(`${UPLOAD_DIR}/${fileHash}`) : []
 }
 
 interface VerifyUploadReq {
@@ -76,8 +76,8 @@ export default class Controller  {
       const [hash] = fields.hash
       const [fileHash] = fields.fileHash
       const [filename] = fields.filename
-      const filePath = `${UPLOAD_DIR}/${fileHash}${extractExt(filename)}`
-      const chunkDir = `${UPLOAD_DIR}/${fileHash}`
+      const filePath = `${UPLOAD_DIR}\\${fileHash}${extractExt(filename)}`
+      const chunkDir = `${UPLOAD_DIR}\\${fileHash}`
 
       // 文件存在直接返回
       if (fse.existsSync(filePath)) {
@@ -92,14 +92,14 @@ export default class Controller  {
       // fs-extra 专用方法，类似 fs.rename 并且跨平台
       // fs-extra 的 rename 方法 windows 平台会有权限问题
       // https://github.com/meteor/meteor/issues/7852#issuecomment-255767835
-      await fse.move(chunk.path, `${chunkDir}/${hash}`)
+      await fse.move(chunk.path, `${chunkDir}\\${hash}`)
       res.end('received file chunk')
     })
   }
   async handleMerge(req: express.Request, res: express.Response): Promise<void> {
     const data: MergeReq = req.body.data
     const ext: string = extractExt(data.filename)
-    const filePath = `${UPLOAD_DIR}/${data.fileHash}${ext}`
+    const filePath = `${UPLOAD_DIR}\\${data.fileHash}${ext}`
     await mergeFileChunk(filePath, data.fileHash)
     res.end(
       JSON.stringify({

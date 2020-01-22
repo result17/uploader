@@ -65,8 +65,8 @@ function mergeFileChunk(filePath, fileHash) {
                     // 创建文件
                     _a.sent();
                     chunkPathAry.forEach(function (chunk) {
-                        fse.appendFileSync(filePath, fse.readFileSync(chunkDir + "/" + chunk));
-                        fse.unlinkSync(chunkDir + "/" + chunk);
+                        fse.appendFileSync(filePath, fse.readFileSync(chunkDir + "\\" + chunk));
+                        fse.unlinkSync(chunkDir + "\\" + chunk);
                     });
                     fse.rmdirSync(chunkDir);
                     return [2 /*return*/];
@@ -80,7 +80,7 @@ function createdUploadedList(fileHash) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    if (!fse.existsSync(UPLOAD_DIR + "/" + fileHash)) return [3 /*break*/, 2];
+                    if (!fse.existsSync(UPLOAD_DIR + "\\" + fileHash)) return [3 /*break*/, 2];
                     return [4 /*yield*/, fse.readdir(UPLOAD_DIR + "/" + fileHash)];
                 case 1:
                     _a = _b.sent();
@@ -146,8 +146,8 @@ var Controller = /** @class */ (function () {
                                 hash = fields.hash[0];
                                 fileHash = fields.fileHash[0];
                                 filename = fields.filename[0];
-                                filePath = UPLOAD_DIR + "/" + fileHash + extractExt(filename);
-                                chunkDir = UPLOAD_DIR + "/" + fileHash;
+                                filePath = UPLOAD_DIR + "\\" + fileHash + extractExt(filename);
+                                chunkDir = UPLOAD_DIR + "\\" + fileHash;
                                 // 文件存在直接返回
                                 if (fse.existsSync(filePath)) {
                                     res.end('file exist');
@@ -162,7 +162,7 @@ var Controller = /** @class */ (function () {
                             // fs-extra 专用方法，类似 fs.rename 并且跨平台
                             // fs-extra 的 rename 方法 windows 平台会有权限问题
                             // https://github.com/meteor/meteor/issues/7852#issuecomment-255767835
-                            return [4 /*yield*/, fse.move(chunk.path, chunkDir + "/" + hash)];
+                            return [4 /*yield*/, fse.move(chunk.path, chunkDir + "\\" + hash)];
                             case 3:
                                 // fs-extra 专用方法，类似 fs.rename 并且跨平台
                                 // fs-extra 的 rename 方法 windows 平台会有权限问题
@@ -185,7 +185,7 @@ var Controller = /** @class */ (function () {
                     case 0:
                         data = req.body.data;
                         ext = extractExt(data.filename);
-                        filePath = UPLOAD_DIR + "/" + data.fileHash + ext;
+                        filePath = UPLOAD_DIR + "\\" + data.fileHash + ext;
                         return [4 /*yield*/, mergeFileChunk(filePath, data.fileHash)];
                     case 1:
                         _a.sent();
