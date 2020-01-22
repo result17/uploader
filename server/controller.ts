@@ -45,9 +45,9 @@ interface MergeReq {
 
 export default class Controller  {
   async handleVerifyUpload(req: express.Request, res: express.Response): Promise<void> {
-    const data: VerifyUploadReq = req.body.data
+    const data: VerifyUploadReq = req.body
     const ext: string = extractExt(data.filename)
-    const filePath = `${UPLOAD_DIR}/${data.fileHash}${ext}`
+    const filePath = `${UPLOAD_DIR}\\${data.fileHash}.${ext}`
     // 检查文件是否上传并完成合并
     if (fse.existsSync(filePath)) {
       res.end(

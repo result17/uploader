@@ -20,13 +20,15 @@ app.use(express.json())
 app.options('*', (req, res) => {
   res.set({
     ...corsHeader,
-    'Status Code': 200,
   })
-  res.end()
+  res.status(200).end()
   return
 })
 
 app.post('/verify', async (req, res) => {
+  res.set({
+    ...corsHeader,
+  })
   await controller.handleVerifyUpload(req, res)
   return
 })
