@@ -184,16 +184,16 @@ var Controller = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+                        res.end(JSON.stringify({
+                            code: 0,
+                            message: 'chunks begin merging.'
+                        }));
                         data = req.body;
                         ext = extractExt(data.filename);
                         filePath = UPLOAD_DIR + "\\" + data.fileHash + "." + ext;
                         return [4 /*yield*/, mergeFileChunk(filePath, data.fileHash)];
                     case 1:
                         _a.sent();
-                        res.end(JSON.stringify({
-                            code: 0,
-                            message: 'file merged success'
-                        }));
                         return [2 /*return*/];
                 }
             });

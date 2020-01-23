@@ -116,8 +116,10 @@ function createProgressHandler(index: number) {
   }
 }
 
-// 通知服务端合并切片
-async function mergeRequest(container: Container, hash: string) {
+/* 通知服务端合并切片(如果合并大文件是需要长时间，而前端客户端不应关心服务器事务，
+  所以服务器应该第一时间响应，而不是等到文件合并完才进行响应)
+*/
+async function mergeRequest(container: Container, hash: string): Promise<void> {
   await request({
     method: 'post',
     url: 'http://localhost:4000/merge',
@@ -140,32 +142,53 @@ React.useEffect(() => {
 }, [state.status])
   return (
     <div id="uploader-wrapper">
-       <Progress type="circle"
-       percent={state.hashPercentage} 
-       format={():string | undefined => {
-         if (state.status === WAIT) return 'start'
-         else if (state.status === PAUSE) return '| |'
-         else return `${state.hashPercentage}%`
-       }}/>
+       <div id="hash-progress">
+         检验文件进度：
+         <Progress 
+           type="circle"
+           percent={state.hashPercentage} 
+           format={():string | undefined => {
+             if (state.status === WAIT) return 'start'
+             else if (state.status === PAUSE) return '| |'
+             else return `${state.hashPercentage}%`
+           }}
+         />
+       </div>
+       <div id="upload-progress">
+         上传文件进度：
+         <Progress 
+           type="circle"
+           percent={
+            state.data!.length ?
+             (state.data!.reduce((acc, cur) => acc += cur.size * cur.percentage, 0) / state.container.file!.size) | 0 : 0
+           }
+           status={state.data!.length ? 'active' : 'normal'}
+         />
+       </div>
        <ButtonGroup>
           <Button 
-          onClick={() => {
-            if (state.container.file) {
-              dispatch({type: 'uploadFile'})
-            }
-          }}
-          disabled={!state.container.file}>
-          upload</Button>
+            onClick={() => {
+              if (state.container.file) {
+                dispatch({type: 'uploadFile'})
+              }
+            }}
+            disabled={!state.container.file}>
+          upload
+          </Button>
           <Button 
-          onClick={() => dispatch({type: 'uploadReset'})}
-          disabled={!state.container.file}
-          >reset</Button>
+            onClick={() => dispatch({type: 'uploadReset'})}
+            disabled={!state.container.file}>
+          reset
+          </Button>
         </ButtonGroup>
        <input id="fileIn" 
          type="file" disabled={status === 'wait'} 
          onChange={(event: React.ChangeEvent<HTMLInputElement>): void => {
           event.persist()
-          dispatch({type: 'fileChange', event: event})
+          // 上传文件后再次选择文件时选择取消会报错，即是取消也会触发changeEvent
+          if (event.target!.files?.length) {
+            dispatch({type: 'fileChange', event: event})
+          }
          }}
       />
     </div>

@@ -98,15 +98,15 @@ export default class Controller  {
     })
   }
   async handleMerge(req: express.Request, res: express.Response): Promise<void> {
+    res.end(
+      JSON.stringify({
+        code: 0,
+        message: 'chunks begin merging.'
+      })
+    )
     const data: MergeReq = req.body
     const ext: string = extractExt(data.filename)
     const filePath = `${UPLOAD_DIR}\\${data.fileHash}.${ext}`
     await mergeFileChunk(filePath, data.fileHash)
-    res.end(
-      JSON.stringify({
-        code: 0,
-        message: 'file merged success'
-      })
-    )
   }
 }
