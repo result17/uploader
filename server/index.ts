@@ -34,12 +34,18 @@ app.post('/verify', async (req, res) => {
 })
 
 app.post('/merge', async (req, res) => {
+  res.set({
+    ...corsHeader,
+  })
   await controller.handleMerge(req, res)
   return
 })
 
 app.post('/', async (req, res) => {
-  await controller.handleMerge(req, res)
+  res.set({
+    ...corsHeader,
+  })
+  await controller.handleFromData(req, res)
   return
 })
 

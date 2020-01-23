@@ -146,7 +146,7 @@ var Controller = /** @class */ (function () {
                                 hash = fields.hash[0];
                                 fileHash = fields.fileHash[0];
                                 filename = fields.filename[0];
-                                filePath = UPLOAD_DIR + "\\" + fileHash + extractExt(filename);
+                                filePath = UPLOAD_DIR + "\\" + fileHash + "." + extractExt(filename);
                                 chunkDir = UPLOAD_DIR + "\\" + fileHash;
                                 // 文件存在直接返回
                                 if (fse.existsSync(filePath)) {
@@ -183,9 +183,9 @@ var Controller = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        data = req.body.data;
+                        data = req.body;
                         ext = extractExt(data.filename);
-                        filePath = UPLOAD_DIR + "\\" + data.fileHash + ext;
+                        filePath = UPLOAD_DIR + "\\" + data.fileHash + "." + ext;
                         return [4 /*yield*/, mergeFileChunk(filePath, data.fileHash)];
                     case 1:
                         _a.sent();

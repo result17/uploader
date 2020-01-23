@@ -77,7 +77,9 @@ app.post('/verify', function (req, res) { return __awaiter(_this, void 0, void 0
 app.post('/merge', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, controller.handleMerge(req, res)];
+            case 0:
+                res.set(__assign({}, corsHeader));
+                return [4 /*yield*/, controller.handleMerge(req, res)];
             case 1:
                 _a.sent();
                 return [2 /*return*/];
@@ -87,7 +89,9 @@ app.post('/merge', function (req, res) { return __awaiter(_this, void 0, void 0,
 app.post('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, controller.handleMerge(req, res)];
+            case 0:
+                res.set(__assign({}, corsHeader));
+                return [4 /*yield*/, controller.handleFromData(req, res)];
             case 1:
                 _a.sent();
                 return [2 /*return*/];

@@ -7,7 +7,7 @@ import initState from './store'
 import reducer from './reducer'
 import { request } from './request'
 import { AxiosResponse } from 'axios'
-import { handleFileChange, cancelReq, createFileChunk, verifyUpload } from './utils'
+import { createFileChunk, verifyUpload } from './utils'
 
 const ButtonGroup = Button.Group
 
@@ -53,17 +53,30 @@ const Uploader: React.FC = ():React.ReactElement => {
           hash: chunkHash,
           chunk: fileChunk.file,
           size: fileChunk.file.size,
-          percentage: uploadedList.includes(chunkHash) ? 100 : 0
+          percentage: uploadedList.includes(chunkHash) ? 100 : 0,
         }
       })
-      dispatch({type: 'chunkListInit', chunkListData: chunkListDatainit})
+      // filter chunk此数组只用于上传切片，在store保存是多余的(在react更新状态会影响速度)
+      dispatch({
+        type: 'chunkListInit', 
+        chunkListData: chunkListDatainit.map(chunkData => {
+          return {
+            fileHash: chunkData.fileHash,
+            index: chunkData.index,
+            hash: chunkData.hash,
+            size: chunkData.size,
+            percentage: chunkData.percentage,
+          }
+        })
+      })
+      await uploadChunks(state.container, chunkListDatainit, uploadedList, hash)
     }
   }
   
   
 
   // 扫描临时文件夹，对于已经上传到文件夹的切片名通过服务器的JSON中的uploadedList，此时不再对切片进行上传
-async function uploadChunks(container: Container,chunkDataList: Array<ChunkData>, uploadedList: Array<string> = []): Promise<void> {
+async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, uploadedList: Array<string> = [], fileHash: string): Promise<void> {
   const willUploadChunkList: Array<ChunkData> = chunkDataList.filter(chunkData => !uploadedList.includes(chunkData.hash))
   const requestFormDataList: Array<formDataObj> = willUploadChunkList.map((chunkData, index) => {
     const formData = new FormData()
@@ -71,25 +84,40 @@ async function uploadChunks(container: Container,chunkDataList: Array<ChunkData>
     formData.append('hash', chunkData.hash)
     // https://stackoverflow.com/questions/40349987/how-to-suppress-error-ts2533-object-is-possibly-null-or-undefined
     formData.append('filename', container.file!.name)
-    formData.append("fileHash", container.hash)
+    formData.append('fileHash', fileHash)
     return {
       index,
       formData,
     }
   })
-  const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = requestFormDataList.map(formDataObj => {
+  const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = requestFormDataList.map((formDataObj, idx) => {
     return request({
       method: 'post',
       url: 'http://localhost:4000',
       data: formDataObj.formData,
+      onUploadProgress: createProgressHandler(idx),
     })
   })
-  const uploadedPromiseList: Array<Promise<void>> = uploadedList.map(uploaded => Promise.resolve())
-  await Promise.all([uploadedPromiseList, requestFormDataPromiseList])
+  // const uploadedPromiseList: Array<Promise<void>> = uploadedList.map(uploaded => Promise.resolve())
+  // 可能不需要组成一个新数组
+  await Promise.all(requestFormDataPromiseList)
+  await mergeRequest(state.container, fileHash)
+}
+
+// 为每一个切片创建一个独立的事件监听函数
+function createProgressHandler(index: number) {
+  return function(e: ProgressEvent) {
+    let chunkPercentage: number = ((e.loaded / e.total) * 100) | 0
+    dispatch({
+      type: 'updateChunkPercentage',
+      chunkIdx: index,
+      chunkPercentage: chunkPercentage,
+    })
+  }
 }
 
 // 通知服务端合并切片
-async function mergeRequest(container: Container) {
+async function mergeRequest(container: Container, hash: string) {
   await request({
     method: 'post',
     url: 'http://localhost:4000/merge',
@@ -97,7 +125,7 @@ async function mergeRequest(container: Container) {
       'content-type': 'application/json'
     },
     data: JSON.stringify({
-      fileHash: container.hash,
+      fileHash: hash,
       filename: container.file!.name
     })
   })

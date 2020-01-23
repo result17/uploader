@@ -76,7 +76,7 @@ export default class Controller  {
       const [hash] = fields.hash
       const [fileHash] = fields.fileHash
       const [filename] = fields.filename
-      const filePath = `${UPLOAD_DIR}\\${fileHash}${extractExt(filename)}`
+      const filePath = `${UPLOAD_DIR}\\${fileHash}.${extractExt(filename)}`
       const chunkDir = `${UPLOAD_DIR}\\${fileHash}`
 
       // 文件存在直接返回
@@ -97,9 +97,9 @@ export default class Controller  {
     })
   }
   async handleMerge(req: express.Request, res: express.Response): Promise<void> {
-    const data: MergeReq = req.body.data
+    const data: MergeReq = req.body
     const ext: string = extractExt(data.filename)
-    const filePath = `${UPLOAD_DIR}\\${data.fileHash}${ext}`
+    const filePath = `${UPLOAD_DIR}\\${data.fileHash}.${ext}`
     await mergeFileChunk(filePath, data.fileHash)
     res.end(
       JSON.stringify({

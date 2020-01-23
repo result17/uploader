@@ -8,7 +8,8 @@ export interface AxiosConfig {
   url: string,
   method: 'get' | 'post',
   headers?: Headers,
-  data?: string | FormData
+  data?: string | FormData,
+  onUploadProgress?: (progressEvent: any) => void
 }
 
 export function request(config: AxiosConfig): Promise<AxiosResponse | void> {

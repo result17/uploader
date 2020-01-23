@@ -1,6 +1,6 @@
 import { State, Action, WAIT, UPLOADING, Container } from './global'
 import initState from './store'
-import { handleFileChange } from './utils'
+import { handleFileChange, handleChunkPercentageUpdate } from './utils'
 
 export default function reducer(state: State, action: Action): State {
   switch (action.type) {
@@ -26,6 +26,8 @@ export default function reducer(state: State, action: Action): State {
       return {...state, status: WAIT}
     case 'chunkListInit':
       return  {...state, data: action.chunkListData}
+    case 'updateChunkPercentage':
+      return handleChunkPercentageUpdate(state, action.chunkIdx as number, action.chunkPercentage as number)
     default:
       return initState
   }

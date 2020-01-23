@@ -13,14 +13,16 @@ interface Action {
   event?: React.ChangeEvent<HTMLInputElement>,
   worker?: Worker,
   percentage?: number | undefined,
-  chunkListData?: Array<ChunkData>,
+  chunkListData?: Array<ChunkStoreData>,
   hash?: string,
+  chunkIdx?: number,
+  chunkPercentage?: number
 }
 
 interface State {
   container: Container,
   hashPercentage: number | undefined,
-  data: Array<ChunkData> | undefined,
+  data: Array<ChunkStoreData> | undefined,
   requestList: Array<string>,
   status: string,
   // 当暂停时会取消 xhr 导致进度条后退
@@ -33,13 +35,15 @@ interface VerifyUploadRes {
   uploadedList?: Array<any>,
 }
 
-interface ChunkData {
-  chunk: Blob,
+interface ChunkStoreData {
   fileHash: string,
   hash: string,
   index: number,
   percentage: number,
   size: number,
+}
+interface ChunkData extends ChunkStoreData {
+  chunk: Blob,
 }
 
 interface formDataObj {
@@ -53,6 +57,4 @@ const WAIT = 'wait'
 const PAUSE = 'pause'
 const UPLOADING = 'uploading'
 
-
-
-export { BlobObj, Container, Action, State, VerifyUploadRes, ChunkData , PIECES, WAIT, PAUSE, UPLOADING, formDataObj }
+export { BlobObj, Container, Action, State, VerifyUploadRes, ChunkData, ChunkStoreData, PIECES, WAIT, PAUSE, UPLOADING, formDataObj }

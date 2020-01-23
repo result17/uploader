@@ -1,4 +1,4 @@
-import { State, PIECES, BlobObj, ChunkData, formDataObj, Container, VerifyUploadRes } from './global'
+import { State, PIECES, BlobObj, ChunkStoreData, VerifyUploadRes } from './global'
 import { request, AxiosConfig } from './request'
 import { AxiosResponse } from 'axios'
 import initState from './store'
@@ -54,12 +54,31 @@ function createFileChunk(fileData: File, len: number = PIECES): Array<BlobObj> {
   return fileChunkList
 }
 
-function creatProgressHandler(chunkData: ChunkData) {
-  return function(e: any) {
-    // 此closure作用仅为更改chunkData的值
-    chunkData.percentage = parseInt(String((e.loaded / e.total) * 100))
+function handleChunkPercentageUpdate(curState: State, idx: number, percentage: number): State {
+  // 根据store不允许直接修改属性，所以返回一个新数组
+  let newData: Array<ChunkStoreData> = curState.data!.map((item, index) => {
+    if (index === idx) {
+      return {
+        fileHash: item.fileHash,
+        hash: item.hash,
+        index: item.index,
+        size: item.size,
+        percentage: percentage,
+      } 
+    } else {
+      return {
+        fileHash: item.fileHash,
+        hash: item.hash,
+        index: item.index,
+        size: item.size,
+        percentage: item.percentage,
+      }
+    }
+  })
+  return {
+    ...curState,
+    data: newData,
   }
 }
 
-
-export { handleFileChange, cancelReq, createFileChunk, verifyUpload }
+export { handleFileChange, handleChunkPercentageUpdate, cancelReq, createFileChunk, verifyUpload }
