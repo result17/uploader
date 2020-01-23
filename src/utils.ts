@@ -48,8 +48,9 @@ function createFileChunk(fileData: File, len: number = PIECES): Array<BlobObj> {
   const chunkSize: number = Math.ceil(fileData.size / len)
   let cur: number = 0
   while (cur < fileData.size) {
-    fileChunkList.push({ file: fileData.slice(cur + chunkSize) })
-    cur += chunkSize
+    let next: number = cur + chunkSize
+    fileChunkList.push({ file: fileData.slice(cur, next) })
+    cur = next
   }
   return fileChunkList
 }

@@ -64,6 +64,7 @@ export default class Controller  {
       )
     }
   }
+  // 处理上传的切片将其保存到临时文件夹
   async handleFromData(req: express.Request, res: express.Response): Promise<void> {
     const multipart = new multiparty.Form()
     multipart.parse(req, async (err, fields, files) => {

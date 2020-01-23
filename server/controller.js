@@ -126,6 +126,7 @@ var Controller = /** @class */ (function () {
             });
         });
     };
+    // 处理上传的切片将其保存到临时文件夹
     Controller.prototype.handleFromData = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var multipart;
