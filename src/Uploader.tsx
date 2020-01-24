@@ -2,14 +2,16 @@ import { Progress, Button, message } from 'antd'
 import 'antd/dist/antd.css'
 import * as React from 'react'
 import './Uploader.css'
-import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, formDataObj } from './global'
+import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, formDataObj, PIECES } from './global'
 import initState from './store'
 import reducer from './reducer'
 import { request } from './request'
-import { AxiosResponse } from 'axios'
+import axios, { AxiosResponse } from 'axios'
 import { createFileChunk, verifyUpload } from './utils'
 
 const ButtonGroup = Button.Group
+const CancelToken = axios.CancelToken
+const source = CancelToken.source();
 
 const Uploader: React.FC = ():React.ReactElement => {
   const [state, dispatch] = React.useReducer(reducer, initState)
@@ -54,6 +56,8 @@ const Uploader: React.FC = ():React.ReactElement => {
           chunk: fileChunk.file,
           size: fileChunk.file.size,
           percentage: uploadedList.includes(chunkHash) ? 100 : 0,
+          cancelToken: source.token,
+          canceler: source.cancel
         }
       })
       // filter chunk此数组只用于上传切片，在store保存是多余的(在react更新状态会影响速度)
@@ -66,6 +70,7 @@ const Uploader: React.FC = ():React.ReactElement => {
             hash: chunkData.hash,
             size: chunkData.size,
             percentage: chunkData.percentage,
+            canceler: chunkData.canceler
           }
         })
       })
@@ -96,12 +101,14 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
       url: 'http://localhost:4000',
       data: formDataObj.formData,
       onUploadProgress: createProgressHandler(idx),
+      cancelToken: chunkDataList[idx].cancelToken
     })
   })
-  // const uploadedPromiseList: Array<Promise<void>> = uploadedList.map(uploaded => Promise.resolve())
-  // 可能不需要组成一个新数组
-  await Promise.all(requestFormDataPromiseList)
-  await mergeRequest(state.container, fileHash)
+  let pList = await Promise.all(requestFormDataPromiseList)
+  // 取消axios请求pList中会有undefined
+  if (!pList.includes(undefined)) {
+    await mergeRequest(state.container, fileHash)
+  }
 }
 
 // 为每一个切片创建一个独立的事件监听函数
@@ -180,8 +187,19 @@ React.useEffect(() => {
             disabled={!state.container.file}>
           reset
           </Button>
+          <Button
+            onClick={() => {
+              // 取消上传文件切片（不能在计算hash中暂停）
+              if (state.data) {
+                state.data[0].canceler()
+              }
+              dispatch({type: 'uploadPause'})
+            }}
+            disabled={!state.container.file}>
+          pause
+          </Button>
         </ButtonGroup>
-       <input id="fileIn" 
+       <input id="file-in" 
          type="file" disabled={status === 'wait'} 
          onChange={(event: React.ChangeEvent<HTMLInputElement>): void => {
           event.persist()
@@ -191,6 +209,13 @@ React.useEffect(() => {
           }
          }}
       />
+      <div id="chunk-list-progress">
+        {
+          state.data!.map((chunkData) => {
+            return <Progress key={chunkData.hash} size="small" percent={chunkData.percentage} />
+          })
+        }
+      </div>
     </div>
   )
 }

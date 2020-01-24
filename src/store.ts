@@ -10,7 +10,6 @@ const initState: State = {
   data: [],
   status: WAIT,
   requestList: [],
-  fakeUploadPercentage: 0,
 }
 
 export default initState

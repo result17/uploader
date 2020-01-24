@@ -1,3 +1,5 @@
+import { CancelToken } from 'axios'
+
 interface BlobObj {
   file: Blob
 }
@@ -25,9 +27,6 @@ interface State {
   data: Array<ChunkStoreData> | undefined,
   requestList: Array<string>,
   status: string,
-  // 当暂停时会取消 xhr 导致进度条后退
-  // 为了避免这种情况，需要定义一个假的进度条
-  fakeUploadPercentage: number,
 }
 
 interface VerifyUploadRes {
@@ -41,9 +40,11 @@ interface ChunkStoreData {
   index: number,
   percentage: number,
   size: number,
+  canceler: () => void,
 }
 interface ChunkData extends ChunkStoreData {
   chunk: Blob,
+  cancelToken: CancelToken,
 }
 
 interface formDataObj {

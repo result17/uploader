@@ -1,4 +1,4 @@
-import { State, Action, WAIT, UPLOADING, Container } from './global'
+import { State, Action, WAIT, UPLOADING, PAUSE } from './global'
 import initState from './store'
 import { handleFileChange, handleChunkPercentageUpdate } from './utils'
 
@@ -10,6 +10,8 @@ export default function reducer(state: State, action: Action): State {
       return {...state, status: UPLOADING}
     case 'uploadReset':
       return {...state, status: WAIT}
+    case 'uploadPause':
+      return {...state, status: PAUSE}
     case 'hashWorker':
       return {...state, container: {
         ...state.container,

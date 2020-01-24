@@ -30,7 +30,6 @@ function handleFileChange(curState: State, e: React.ChangeEvent<HTMLInputElement
         return curState
       }
   }
-  cancelReq()
   return {
     ...initState,
     container: {
@@ -39,8 +38,6 @@ function handleFileChange(curState: State, e: React.ChangeEvent<HTMLInputElement
     }
   }
 }
-// 取消正在进行的请求
-function cancelReq(): void {}
 
 // 文件切片
 function createFileChunk(fileData: File, len: number = PIECES): Array<BlobObj> {
@@ -65,6 +62,7 @@ function handleChunkPercentageUpdate(curState: State, idx: number, percentage: n
         index: item.index,
         size: item.size,
         percentage: percentage,
+        canceler: item.canceler,
       } 
     } else {
       return {
@@ -73,6 +71,7 @@ function handleChunkPercentageUpdate(curState: State, idx: number, percentage: n
         index: item.index,
         size: item.size,
         percentage: item.percentage,
+        canceler: item.canceler,
       }
     }
   })
@@ -82,4 +81,4 @@ function handleChunkPercentageUpdate(curState: State, idx: number, percentage: n
   }
 }
 
-export { handleFileChange, handleChunkPercentageUpdate, cancelReq, createFileChunk, verifyUpload }
+export { handleFileChange, handleChunkPercentageUpdate, createFileChunk, verifyUpload }
