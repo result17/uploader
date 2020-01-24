@@ -24,8 +24,6 @@ export default function reducer(state: State, action: Action): State {
       }}
     case 'updateHashPercentage':
       return {...state, hashPercentage: action.percentage}
-    case 'fileUploadedSatusChanged':
-      return {...state, status: WAIT}
     case 'chunkListInit':
       return  {...state, data: action.chunkListData}
     case 'updateChunkPercentage':

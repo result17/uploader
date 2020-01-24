@@ -1,2 +1,2 @@
 todo:
-pause function
+resum function

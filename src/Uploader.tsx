@@ -42,7 +42,7 @@ const Uploader: React.FC = ():React.ReactElement => {
     // 服务器存在该文件
     if (!shouldUpload) {
       message.success("upload sucess!")
-      dispatch({type: 'fileUploadedSatusChanged'})
+      dispatch({type: 'uploadReset'})
       return
     }
     // 空数组也为true
@@ -77,8 +77,6 @@ const Uploader: React.FC = ():React.ReactElement => {
       await uploadChunks(state.container, chunkListDatainit, uploadedList, hash)
     }
   }
-  
-  
 
   // 扫描临时文件夹，对于已经上传到文件夹的切片名通过服务器的JSON中的uploadedList，此时不再对切片进行上传
 async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, uploadedList: Array<string> = [], fileHash: string): Promise<void> {
@@ -142,9 +140,22 @@ async function mergeRequest(container: Container, hash: string): Promise<void> {
   dispatch({type: 'uploadReset'})
 }
 
+async function handleResum() {
+  const { shouldUpload, uploadedList } = await verifyUpload(state.container.file!.name, state.container.hash)
+  if (!shouldUpload) {
+    message.success("upload sucess!")
+    dispatch({type: 'uploadReset'})
+    return
+  }
+}
+
 React.useEffect(() => {
-  if (state.status === UPLOADING) {
+  if (state.status === UPLOADING && !state.data) {
+    // 未生成文件切片 初次上传状态
     handleUpload()
+  } else if (state.status === UPLOADING && state.data) {
+  // 已经生成文件切片 恢复上传状态
+    handleResum()
   }
 }, [state.status])
   return (
@@ -175,9 +186,10 @@ React.useEffect(() => {
        <ButtonGroup>
           <Button 
             onClick={() => {
-              if (state.container.file) {
+              if (state.container.file ) {
+                // 初次上传状态 wait -> uploading和恢复上传状态 pause -> uploading
                 dispatch({type: 'uploadFile'})
-              }
+              } 
             }}
             disabled={!state.container.file}>
           upload
