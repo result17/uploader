@@ -1,9 +1,17 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+<<<<<<< HEAD
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+=======
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -53,6 +61,7 @@ function mergeFileChunk(filePath, fileHash) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+<<<<<<< HEAD
                     chunkDir = UPLOAD_DIR + "\\" + fileHash;
                     return [4 /*yield*/, fse.readdir(chunkDir)
                         // 确保切片顺序
@@ -61,14 +70,27 @@ function mergeFileChunk(filePath, fileHash) {
                     chunkPathAry = _a.sent();
                     // 确保切片顺序
                     chunkPathAry.sort();
+=======
+                    chunkDir = UPLOAD_DIR + "/" + fileHash;
+                    return [4 /*yield*/, fse.readdir(chunkDir)
+                        // 创建文件
+                    ];
+                case 1:
+                    chunkPathAry = _a.sent();
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
                     // 创建文件
                     return [4 /*yield*/, fse.writeFile(filePath, '')];
                 case 2:
                     // 创建文件
                     _a.sent();
                     chunkPathAry.forEach(function (chunk) {
+<<<<<<< HEAD
                         fse.appendFileSync(filePath, fse.readFileSync(chunkDir + "\\" + chunk));
                         fse.unlinkSync(chunkDir + "\\" + chunk);
+=======
+                        fse.appendFileSync(filePath, fse.readFileSync(chunkDir + "/" + chunk));
+                        fse.unlinkSync(chunkDir + "/" + chunk);
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
                     });
                     fse.rmdirSync(chunkDir);
                     return [2 /*return*/];
@@ -82,8 +104,13 @@ function createdUploadedList(fileHash) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
+<<<<<<< HEAD
                     if (!fse.existsSync(UPLOAD_DIR + "\\" + fileHash)) return [3 /*break*/, 2];
                     return [4 /*yield*/, fse.readdir(UPLOAD_DIR + "\\" + fileHash)];
+=======
+                    if (!fse.existsSync(UPLOAD_DIR + "/" + fileHash)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, fse.readdir(UPLOAD_DIR + "/" + fileHash)];
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
                 case 1:
                     _a = _b.sent();
                     return [3 /*break*/, 3];
@@ -104,9 +131,15 @@ var Controller = /** @class */ (function () {
             return __generator(this, function (_f) {
                 switch (_f.label) {
                     case 0:
+<<<<<<< HEAD
                         data = req.body;
                         ext = extractExt(data.filename);
                         filePath = UPLOAD_DIR + "\\" + data.fileHash + "." + ext;
+=======
+                        data = req.body.data;
+                        ext = extractExt(data.filename);
+                        filePath = UPLOAD_DIR + "/" + data.fileHash + ext;
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
                         if (!fse.existsSync(filePath)) return [3 /*break*/, 1];
                         res.end(JSON.stringify({
                             shouldUpload: false
@@ -128,7 +161,10 @@ var Controller = /** @class */ (function () {
             });
         });
     };
+<<<<<<< HEAD
     // 处理上传的切片将其保存到临时文件夹
+=======
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
     Controller.prototype.handleFromData = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
             var multipart;
@@ -149,8 +185,13 @@ var Controller = /** @class */ (function () {
                                 hash = fields.hash[0];
                                 fileHash = fields.fileHash[0];
                                 filename = fields.filename[0];
+<<<<<<< HEAD
                                 filePath = UPLOAD_DIR + "\\" + fileHash + "." + extractExt(filename);
                                 chunkDir = UPLOAD_DIR + "\\" + fileHash;
+=======
+                                filePath = UPLOAD_DIR + "/" + fileHash + extractExt(filename);
+                                chunkDir = UPLOAD_DIR + "/" + fileHash;
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
                                 // 文件存在直接返回
                                 if (fse.existsSync(filePath)) {
                                     res.end('file exist');
@@ -165,7 +206,11 @@ var Controller = /** @class */ (function () {
                             // fs-extra 专用方法，类似 fs.rename 并且跨平台
                             // fs-extra 的 rename 方法 windows 平台会有权限问题
                             // https://github.com/meteor/meteor/issues/7852#issuecomment-255767835
+<<<<<<< HEAD
                             return [4 /*yield*/, fse.move(chunk.path, chunkDir + "\\" + hash)];
+=======
+                            return [4 /*yield*/, fse.move(chunk.path, chunkDir + "/" + hash)];
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
                             case 3:
                                 // fs-extra 专用方法，类似 fs.rename 并且跨平台
                                 // fs-extra 的 rename 方法 windows 平台会有权限问题
@@ -186,6 +231,7 @@ var Controller = /** @class */ (function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
+<<<<<<< HEAD
                         res.end(JSON.stringify({
                             code: 0,
                             message: 'chunks begin merging.'
@@ -196,6 +242,18 @@ var Controller = /** @class */ (function () {
                         return [4 /*yield*/, mergeFileChunk(filePath, data.fileHash)];
                     case 1:
                         _a.sent();
+=======
+                        data = req.body.data;
+                        ext = extractExt(data.filename);
+                        filePath = UPLOAD_DIR + "/" + data.fileHash + ext;
+                        return [4 /*yield*/, mergeFileChunk(filePath, data.fileHash)];
+                    case 1:
+                        _a.sent();
+                        res.end(JSON.stringify({
+                            code: 0,
+                            message: 'file merged success'
+                        }));
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
                         return [2 /*return*/];
                 }
             });

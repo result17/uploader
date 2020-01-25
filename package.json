@@ -20,6 +20,7 @@
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
+<<<<<<< HEAD
     "@types/axios": "^0.14.0",
     "@types/express": "^4.17.2",
     "@types/fs-extra": "^8.0.1",
@@ -27,5 +28,9 @@
     "antd": "^3.26.7",
     "fs-extra": "^8.1.0",
     "multiparty": "^4.2.1"
+=======
+    "antd": "^3.26.7",
+    "axios": "^0.19.1"
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
   }
 }

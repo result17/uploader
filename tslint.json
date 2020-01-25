@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "extends": [],
   "defaultSeverity": "warning",
@@ -8,3 +9,15 @@
     ]
   }
 }
+=======
+{
+  "extends": [],
+  "defaultSeverity": "warning",
+  "linterOptions": {
+    "exclude": [
+      "config/**/*.js",
+      "node_modules/**/*.ts"
+    ]
+  }
+}
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992

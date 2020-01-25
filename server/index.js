@@ -11,10 +11,18 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+<<<<<<< HEAD
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
         function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+=======
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -45,7 +53,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+<<<<<<< HEAD
 var _this = this;
+=======
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
 exports.__esModule = true;
 var express = require("express");
 var controller_1 = require("./controller");
@@ -58,6 +69,7 @@ var corsHeader = {
 var controller = new controller_1["default"]();
 app.use(express.json());
 app.options('*', function (req, res) {
+<<<<<<< HEAD
     res.set(__assign({}, corsHeader));
     res.status(200).end();
     return;
@@ -68,30 +80,54 @@ app.post('/verify', function (req, res) { return __awaiter(_this, void 0, void 0
             case 0:
                 res.set(__assign({}, corsHeader));
                 return [4 /*yield*/, controller.handleVerifyUpload(req, res)];
+=======
+    res.set(__assign(__assign({}, corsHeader), { 'Status Code': 200 }));
+    res.end();
+    return;
+});
+app.post('/verify', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, controller.handleVerifyUpload(req, res)];
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
             case 1:
                 _a.sent();
                 return [2 /*return*/];
         }
     });
 }); });
+<<<<<<< HEAD
 app.post('/merge', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 res.set(__assign({}, corsHeader));
                 return [4 /*yield*/, controller.handleMerge(req, res)];
+=======
+app.post('/merge', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, controller.handleMerge(req, res)];
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
             case 1:
                 _a.sent();
                 return [2 /*return*/];
         }
     });
 }); });
+<<<<<<< HEAD
 app.post('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 res.set(__assign({}, corsHeader));
                 return [4 /*yield*/, controller.handleFromData(req, res)];
+=======
+app.post('/', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, controller.handleMerge(req, res)];
+>>>>>>> 2307e19e5878126f43fb3219255ae4f4cb1be992
             case 1:
                 _a.sent();
                 return [2 /*return*/];
