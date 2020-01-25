@@ -16,7 +16,7 @@ export interface AxiosConfig {
 export function request(config: AxiosConfig): Promise<AxiosResponse | void> {
   return axios(config).catch(function (error: AxiosError): void {
     if (axios.isCancel(error)) {
-      // 
+      // console.log('canceled')
     } else {
       if (error.response) {
         // console.log(error.response.data)

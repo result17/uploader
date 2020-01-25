@@ -16,9 +16,11 @@ function extractExt(filename: string): string {
 // 合并切片
 async function mergeFileChunk(filePath: string, fileHash: string): Promise<void> {
   // 临时保存切片的文件夹
-  const chunkDir: string = `${UPLOAD_DIR}/${fileHash}`
+  const chunkDir: string = `${UPLOAD_DIR}\\${fileHash}`
   // readdir以promise形式返回文件夹中所有文件组成文件名数组
-  const chunkPathAry: Array<string> = await fse.readdir(chunkDir)
+  let chunkPathAry: Array<string> = await fse.readdir(chunkDir)
+  // 确保切片顺序
+  chunkPathAry.sort()
   // 创建文件
   await fse.writeFile(filePath, '')
   chunkPathAry.forEach(chunk => {

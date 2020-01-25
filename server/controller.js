@@ -53,12 +53,14 @@ function mergeFileChunk(filePath, fileHash) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    chunkDir = UPLOAD_DIR + "/" + fileHash;
+                    chunkDir = UPLOAD_DIR + "\\" + fileHash;
                     return [4 /*yield*/, fse.readdir(chunkDir)
-                        // 创建文件
+                        // 确保切片顺序
                     ];
                 case 1:
                     chunkPathAry = _a.sent();
+                    // 确保切片顺序
+                    chunkPathAry.sort();
                     // 创建文件
                     return [4 /*yield*/, fse.writeFile(filePath, '')];
                 case 2:

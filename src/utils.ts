@@ -61,12 +61,13 @@ function createUploadListNumAry(uploadedList: Array<string>): Array<number> {
 function createResumUploadChunkAry(fileData: File, uploadedNumAry: Array<number>): Array<BlobObj> {
   const fileChunkList: Array<BlobObj> = []
   const chunkSize: number = Math.ceil(fileData.size / PIECES)
-  let start: number = 0
-  while (start < PIECES) {
-    if (!uploadedNumAry.includes(start)) {
-      fileChunkList.push({file: fileData.slice(start * chunkSize, chunkSize)})
+  let step: number = 0
+  while (step < PIECES) {
+    if (!uploadedNumAry.includes(step)) {
+      let start: number = step * chunkSize, end: number = start + chunkSize
+      fileChunkList.push({file: fileData.slice(start, end)})
     }
-    start++
+    step++
   }
   return fileChunkList
 }

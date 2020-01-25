@@ -10,8 +10,6 @@ import axios, { AxiosResponse } from 'axios'
 import { createFileChunk, verifyUpload, createUploadListNumAry, createResumUploadChunkAry, createRestNumAry } from './utils'
 
 const ButtonGroup = Button.Group
-const CancelToken = axios.CancelToken
-const source = CancelToken.source();
 
 const Uploader: React.FC = ():React.ReactElement => {
   const [state, dispatch] = React.useReducer(reducer, initState)
@@ -32,6 +30,9 @@ const Uploader: React.FC = ():React.ReactElement => {
   }
   
   async function handleUpload(): Promise<any> {
+    const CancelToken = axios.CancelToken
+    const source = CancelToken.source()
+
     if (!state.container.file) return Promise.reject()
     const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file)
     let hash: string = await calHash(fileChunkList)
@@ -79,7 +80,7 @@ const Uploader: React.FC = ():React.ReactElement => {
   // 扫描临时文件夹，对于已经上传到文件夹的切片名通过服务器的JSON中的uploadedList，此时不再对切片进行上传
 async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, fileHash: string, uploadedList: Array<string> = []): Promise<void> {
   const willUploadChunkList: Array<ChunkData> = chunkDataList.filter(chunkData => !uploadedList.includes(chunkData.hash))
-  const requestFormDataList: Array<formDataObj> = willUploadChunkList.map((chunkData, index) => {
+  const requestFormDataList: Array<formDataObj> = willUploadChunkList.map(chunkData => {
     const formData = new FormData()
     formData.append('chunk', chunkData.chunk)
     formData.append('hash', chunkData.hash)
@@ -87,18 +88,17 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
     formData.append('filename', container.file!.name)
     formData.append('fileHash', fileHash)
     return {
-      index,
+      index: chunkData.index,
       formData,
     }
   })
-  console.log(requestFormDataList)
   const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = requestFormDataList.map((formDataObj, idx) => {
     return request({
       method: 'post',
       url: 'http://localhost:4000',
       data: formDataObj.formData,
-      onUploadProgress: createProgressHandler(idx),
-      cancelToken: chunkDataList[idx].cancelToken,
+      onUploadProgress: createProgressHandler(formDataObj.index),
+      cancelToken: willUploadChunkList[idx].cancelToken,
     })
   })
   let pList = await Promise.all(requestFormDataPromiseList)
@@ -140,6 +140,9 @@ async function mergeRequest(container: Container, hash: string): Promise<void> {
 }
 
 async function handleResum() {
+  const CancelToken = axios.CancelToken
+  const source = CancelToken.source()
+
   const { shouldUpload, uploadedList } = await verifyUpload(state.container.file!.name, state.container.hash)
   if (!shouldUpload) {
     message.success("upload sucess!")
@@ -151,9 +154,11 @@ async function handleResum() {
   const restNumAry: Array<number> = createRestNumAry(numAry)
   // 更新恢复上传后切片的进度，已经上传的为100%，其余为0%
   dispatch({type: 'updateResumChunkPercentage', uploadedNumAry: numAry})
+  // debugger
   const resumUploadChunkAry: Array<BlobObj> = createResumUploadChunkAry(state.container.file as File, numAry)
   const resumUploadChunkList: Array<ChunkData> = resumUploadChunkAry.map((chunk: BlobObj, idx: number) => {
     let chunkHash: string = `${state.container.hash}-${restNumAry[idx]}`
+
     return {
       fileHash: state.container.hash,
       hash: chunkHash,
@@ -214,15 +219,20 @@ React.useEffect(() => {
           upload
           </Button>
           <Button 
-            onClick={() => dispatch({type: 'uploadReset'})}
+            onClick={() => {
+              if (state.data!.length) {
+                state.data![0].canceler()
+              }
+              dispatch({type: 'uploadReset'})
+            }}
             disabled={!state.container.file}>
           reset
           </Button>
           <Button
             onClick={() => {
               // 取消上传文件切片（不能在计算hash中暂停）
-              if (state.data) {
-                state.data[0].canceler()
+              if (state.data!.length) {
+                state.data![0].canceler()
               }
               dispatch({type: 'uploadPause'})
             }}
