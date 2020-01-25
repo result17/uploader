@@ -52,27 +52,44 @@ function createFileChunk(fileData: File, len: number = PIECES): Array<BlobObj> {
   return fileChunkList
 }
 
+function createUploadListNumAry(uploadedList: Array<string>): Array<number> {
+  const reg: RegExp = /.*-(.*)$/
+  // 确保是升序排列
+  return uploadedList.map(upload => parseInt(upload.replace(reg, '$1'))).sort((a, b) => a - b)
+}
+
+function createResumUploadChunkAry(fileData: File, uploadedNumAry: Array<number>): Array<BlobObj> {
+  const fileChunkList: Array<BlobObj> = []
+  const chunkSize: number = Math.ceil(fileData.size / PIECES)
+  let start: number = 0
+  while (start < PIECES) {
+    if (!uploadedNumAry.includes(start)) {
+      fileChunkList.push({file: fileData.slice(start * chunkSize, chunkSize)})
+    }
+    start++
+  }
+  return fileChunkList
+}
+
 function handleChunkPercentageUpdate(curState: State, idx: number, percentage: number): State {
-  // 根据store不允许直接修改属性，所以返回一个新数组
+  // 因为store不允许直接修改属性，所以返回一个新数组
   let newData: Array<ChunkStoreData> = curState.data!.map((item, index) => {
-    if (index === idx) {
-      return {
-        fileHash: item.fileHash,
-        hash: item.hash,
-        index: item.index,
-        size: item.size,
-        percentage: percentage,
-        canceler: item.canceler,
-      } 
-    } else {
-      return {
-        fileHash: item.fileHash,
-        hash: item.hash,
-        index: item.index,
-        size: item.size,
-        percentage: item.percentage,
-        canceler: item.canceler,
-      }
+    return {
+      ...item,
+      percentage: index === idx ? percentage : item.percentage,
+    } 
+  })
+  return {
+    ...curState,
+    data: newData,
+  }
+}
+
+function handleResumChunkPercentageUpdate(curState: State, numAry: Array<number>): State {
+  let newData: Array<ChunkStoreData> = curState.data!.map((item, index) => {
+    return {
+      ...item,
+      percentage: numAry.includes(index) ? 100 : 0,
     }
   })
   return {
@@ -81,4 +98,23 @@ function handleChunkPercentageUpdate(curState: State, idx: number, percentage: n
   }
 }
 
-export { handleFileChange, handleChunkPercentageUpdate, createFileChunk, verifyUpload }
+function createRestNumAry(ary: Array<number>): Array<number> {
+  let rest: Array<number> = []
+  for (let i = 0; i < PIECES; i++) {
+    if (!ary.includes(i)) {
+      rest.push(i)
+    }
+  }
+  return rest
+}
+
+export { 
+  handleFileChange, 
+  handleChunkPercentageUpdate, 
+  createFileChunk, 
+  verifyUpload, 
+  createUploadListNumAry, 
+  createResumUploadChunkAry,
+  handleResumChunkPercentageUpdate,
+  createRestNumAry,
+}

@@ -18,7 +18,8 @@ interface Action {
   chunkListData?: Array<ChunkStoreData>,
   hash?: string,
   chunkIdx?: number,
-  chunkPercentage?: number
+  chunkPercentage?: number,
+  uploadedNumAry?: Array<number>,
 }
 
 interface State {

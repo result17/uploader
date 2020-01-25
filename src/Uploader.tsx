@@ -2,12 +2,12 @@ import { Progress, Button, message } from 'antd'
 import 'antd/dist/antd.css'
 import * as React from 'react'
 import './Uploader.css'
-import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, formDataObj, PIECES } from './global'
+import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, formDataObj } from './global'
 import initState from './store'
 import reducer from './reducer'
 import { request } from './request'
 import axios, { AxiosResponse } from 'axios'
-import { createFileChunk, verifyUpload } from './utils'
+import { createFileChunk, verifyUpload, createUploadListNumAry, createResumUploadChunkAry, createRestNumAry } from './utils'
 
 const ButtonGroup = Button.Group
 const CancelToken = axios.CancelToken
@@ -31,11 +31,9 @@ const Uploader: React.FC = ():React.ReactElement => {
     })
   }
   
-
   async function handleUpload(): Promise<any> {
     if (!state.container.file) return Promise.reject()
     const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file)
-    // hash值可以保存在local host中
     let hash: string = await calHash(fileChunkList)
     dispatch({type: 'updateHash', hash: hash})
     const { shouldUpload, uploadedList }= await verifyUpload(state.container.file.name, hash)
@@ -57,7 +55,7 @@ const Uploader: React.FC = ():React.ReactElement => {
           size: fileChunk.file.size,
           percentage: uploadedList.includes(chunkHash) ? 100 : 0,
           cancelToken: source.token,
-          canceler: source.cancel
+          canceler: source.cancel,
         }
       })
       // filter chunk此数组只用于上传切片，在store保存是多余的(在react更新状态会影响速度)
@@ -70,16 +68,16 @@ const Uploader: React.FC = ():React.ReactElement => {
             hash: chunkData.hash,
             size: chunkData.size,
             percentage: chunkData.percentage,
-            canceler: chunkData.canceler
+            canceler: chunkData.canceler,
           }
         })
       })
-      await uploadChunks(state.container, chunkListDatainit, uploadedList, hash)
+      await uploadChunks(state.container, chunkListDatainit, hash, uploadedList)
     }
   }
 
   // 扫描临时文件夹，对于已经上传到文件夹的切片名通过服务器的JSON中的uploadedList，此时不再对切片进行上传
-async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, uploadedList: Array<string> = [], fileHash: string): Promise<void> {
+async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, fileHash: string, uploadedList: Array<string> = []): Promise<void> {
   const willUploadChunkList: Array<ChunkData> = chunkDataList.filter(chunkData => !uploadedList.includes(chunkData.hash))
   const requestFormDataList: Array<formDataObj> = willUploadChunkList.map((chunkData, index) => {
     const formData = new FormData()
@@ -93,13 +91,14 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
       formData,
     }
   })
+  console.log(requestFormDataList)
   const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = requestFormDataList.map((formDataObj, idx) => {
     return request({
       method: 'post',
       url: 'http://localhost:4000',
       data: formDataObj.formData,
       onUploadProgress: createProgressHandler(idx),
-      cancelToken: chunkDataList[idx].cancelToken
+      cancelToken: chunkDataList[idx].cancelToken,
     })
   })
   let pList = await Promise.all(requestFormDataPromiseList)
@@ -147,13 +146,33 @@ async function handleResum() {
     dispatch({type: 'uploadReset'})
     return
   }
+  // numAry为所有已经上传到服务器切片的编号数组
+  const numAry: Array<number> = createUploadListNumAry(uploadedList as Array<string>)
+  const restNumAry: Array<number> = createRestNumAry(numAry)
+  // 更新恢复上传后切片的进度，已经上传的为100%，其余为0%
+  dispatch({type: 'updateResumChunkPercentage', uploadedNumAry: numAry})
+  const resumUploadChunkAry: Array<BlobObj> = createResumUploadChunkAry(state.container.file as File, numAry)
+  const resumUploadChunkList: Array<ChunkData> = resumUploadChunkAry.map((chunk: BlobObj, idx: number) => {
+    let chunkHash: string = `${state.container.hash}-${restNumAry[idx]}`
+    return {
+      fileHash: state.container.hash,
+      hash: chunkHash,
+      index: restNumAry[idx],
+      chunk: chunk.file,
+      size: chunk.file.size,
+      percentage: 0,
+      cancelToken: source.token,
+      canceler: source.cancel,
+    }
+  })
+  await uploadChunks(state.container, resumUploadChunkList, state.container.hash)
 }
 
 React.useEffect(() => {
-  if (state.status === UPLOADING && !state.data) {
+  if (state.status === UPLOADING && !state.data!.length) {
     // 未生成文件切片 初次上传状态
     handleUpload()
-  } else if (state.status === UPLOADING && state.data) {
+  } else if (state.status === UPLOADING && state.data!.length) {
   // 已经生成文件切片 恢复上传状态
     handleResum()
   }

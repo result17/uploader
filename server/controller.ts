@@ -30,7 +30,7 @@ async function mergeFileChunk(filePath: string, fileHash: string): Promise<void>
 
 
 async function createdUploadedList(fileHash: string): Promise<Array<string | void>> {
-  return fse.existsSync(`${UPLOAD_DIR}\\${fileHash}`) ? await fse.readdir(`${UPLOAD_DIR}/${fileHash}`) : []
+  return fse.existsSync(`${UPLOAD_DIR}\\${fileHash}`) ? await fse.readdir(`${UPLOAD_DIR}\\${fileHash}`) : []
 }
 
 interface VerifyUploadReq {

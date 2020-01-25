@@ -81,7 +81,7 @@ function createdUploadedList(fileHash) {
             switch (_b.label) {
                 case 0:
                     if (!fse.existsSync(UPLOAD_DIR + "\\" + fileHash)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, fse.readdir(UPLOAD_DIR + "/" + fileHash)];
+                    return [4 /*yield*/, fse.readdir(UPLOAD_DIR + "\\" + fileHash)];
                 case 1:
                     _a = _b.sent();
                     return [3 /*break*/, 3];
