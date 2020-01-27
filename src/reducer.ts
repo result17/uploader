@@ -9,7 +9,7 @@ export default function reducer(state: State, action: Action): State {
     case 'uploadFile':
       return {...state, status: UPLOADING}
     case 'uploadReset':
-      return {...state, status: WAIT}
+      return initState
     case 'uploadPause':
       return {...state, status: PAUSE}
     case 'hashWorker':

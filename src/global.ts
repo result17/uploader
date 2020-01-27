@@ -8,6 +8,7 @@ interface Container {
   file: File | null,
   hash: string,
   worker: Worker | undefined,
+  pieces: number,
 }
 
 interface Action {
@@ -53,10 +54,8 @@ interface formDataObj {
   index: number,
 }
 
-const PIECES = 10
-
 const WAIT = 'wait'
 const PAUSE = 'pause'
 const UPLOADING = 'uploading'
 
-export { BlobObj, Container, Action, State, VerifyUploadRes, ChunkData, ChunkStoreData, PIECES, WAIT, PAUSE, UPLOADING, formDataObj }
+export { BlobObj, Container, Action, State, VerifyUploadRes, ChunkData, ChunkStoreData, WAIT, PAUSE, UPLOADING, formDataObj }

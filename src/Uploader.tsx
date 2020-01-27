@@ -34,7 +34,7 @@ const Uploader: React.FC = ():React.ReactElement => {
     const source = CancelToken.source()
 
     if (!state.container.file) return Promise.reject()
-    const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file)
+    const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file, state.container.pieces)
     let hash: string = await calHash(fileChunkList)
     dispatch({type: 'updateHash', hash: hash})
     const { shouldUpload, uploadedList }= await verifyUpload(state.container.file.name, hash)
@@ -151,11 +151,11 @@ async function handleResum() {
   }
   // numAry为所有已经上传到服务器切片的编号数组
   const numAry: Array<number> = createUploadListNumAry(uploadedList as Array<string>)
-  const restNumAry: Array<number> = createRestNumAry(numAry)
+  const restNumAry: Array<number> = createRestNumAry(numAry, state.container.pieces)
   // 更新恢复上传后切片的进度，已经上传的为100%，其余为0%
   dispatch({type: 'updateResumChunkPercentage', uploadedNumAry: numAry})
   // debugger
-  const resumUploadChunkAry: Array<BlobObj> = createResumUploadChunkAry(state.container.file as File, numAry)
+  const resumUploadChunkAry: Array<BlobObj> = createResumUploadChunkAry(state.container.file as File, numAry, state.container.pieces)
   const resumUploadChunkList: Array<ChunkData> = resumUploadChunkAry.map((chunk: BlobObj, idx: number) => {
     let chunkHash: string = `${state.container.hash}-${restNumAry[idx]}`
 
@@ -192,7 +192,7 @@ React.useEffect(() => {
            format={():string | undefined => {
              if (state.status === WAIT) return 'start'
              else if (state.status === PAUSE) return '| |'
-             else return `${state.hashPercentage}%`
+             else return `${Math.floor(state.hashPercentage as number)}%`
            }}
          />
        </div>
@@ -225,7 +225,7 @@ React.useEffect(() => {
               }
               dispatch({type: 'uploadReset'})
             }}
-            disabled={!state.container.file}>
+            disabled={!state.data!.length}>
           reset
           </Button>
           <Button
