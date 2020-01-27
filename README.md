@@ -11,6 +11,8 @@ npm start
 传输exe文件时，会出现Error: EBUSY: resource busy or locked
 https://github.com/npm/npm/issues/13461
 这取决于使用者环境中的反恶意软件，所以不建议传输exe文件。
+实测在win10下，npm script 并行执行的是 | 而不是linux的是 &（暂时没有linux系统进行测试），请使用linux的同学自行修改。
+（题外话，&& 是串行执行，&是并行执行）
 npm script
 ## test
 测试环境：win10
