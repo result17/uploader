@@ -35,7 +35,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var multiparty = require("multiparty");
 var path = require("path");
 var fse = require("fs-extra");
 var targetDir = 'target';
@@ -129,53 +128,39 @@ var Controller = /** @class */ (function () {
         });
     };
     // 处理上传的切片将其保存到临时文件夹
-    Controller.prototype.handleFromData = function (req, res) {
+    Controller.prototype.handleUpload = function (req, res) {
         return __awaiter(this, void 0, void 0, function () {
-            var multipart;
-            var _this = this;
             return __generator(this, function (_a) {
-                multipart = new multiparty.Form();
-                multipart.parse(req, function (err, fields, files) { return __awaiter(_this, void 0, void 0, function () {
-                    var chunk, hash, fileHash, filename, filePath, chunkDir;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                if (err) {
-                                    console.error(err);
-                                    res.status(500).end('process file chunk failed');
-                                    return [2 /*return*/];
-                                }
-                                chunk = files.chunk[0];
-                                hash = fields.hash[0];
-                                fileHash = fields.fileHash[0];
-                                filename = fields.filename[0];
-                                filePath = UPLOAD_DIR + "\\" + fileHash + "." + extractExt(filename);
-                                chunkDir = UPLOAD_DIR + "\\" + fileHash;
-                                // 文件存在直接返回
-                                if (fse.existsSync(filePath)) {
-                                    res.end('file exist');
-                                    return [2 /*return*/];
-                                }
-                                if (!!fse.existsSync(chunkDir)) return [3 /*break*/, 2];
-                                return [4 /*yield*/, fse.mkdirs(chunkDir)];
-                            case 1:
-                                _a.sent();
-                                _a.label = 2;
-                            case 2: 
-                            // fs-extra 专用方法，类似 fs.rename 并且跨平台
-                            // fs-extra 的 rename 方法 windows 平台会有权限问题
-                            // https://github.com/meteor/meteor/issues/7852#issuecomment-255767835
-                            return [4 /*yield*/, fse.move(chunk.path, chunkDir + "\\" + hash)];
-                            case 3:
-                                // fs-extra 专用方法，类似 fs.rename 并且跨平台
-                                // fs-extra 的 rename 方法 windows 平台会有权限问题
-                                // https://github.com/meteor/meteor/issues/7852#issuecomment-255767835
-                                _a.sent();
-                                res.end('received file chunk');
-                                return [2 /*return*/];
-                        }
-                    });
-                }); });
+                // const multipart = new multiparty.Form()
+                // multipart.parse(req, async (err, fields, files) => {
+                //   if (err) {
+                //     console.error(err)
+                //     res.status(500).end('process file chunk failed')
+                //     return
+                //   }
+                //   const [chunk] = files.chunk
+                //   const [hash] = fields.hash
+                //   const [fileHash] = fields.fileHash
+                //   const [filename] = fields.filename
+                //   const filePath = `${UPLOAD_DIR}\\${fileHash}.${extractExt(filename)}`
+                //   const chunkDir = `${UPLOAD_DIR}\\${fileHash}`
+                //   // 文件存在直接返回
+                //   if (fse.existsSync(filePath)) {
+                //     res.end('file exist')
+                //     return
+                //   }
+                //   // 切片目录不存在，创建切片目录
+                //   if (!fse.existsSync(chunkDir)) {
+                //     await fse.mkdirs(chunkDir)
+                //   }
+                //   // fs-extra 专用方法，类似 fs.rename 并且跨平台
+                //   // fs-extra 的 rename 方法 windows 平台会有权限问题
+                //   // https://github.com/meteor/meteor/issues/7852#issuecomment-255767835
+                //   await fse.move(chunk.path, `${chunkDir}\\${hash}`)
+                //   res.end('received file chunk')
+                // })
+                console.log(req.body);
+                res.end('received file chunk');
                 return [2 /*return*/];
             });
         });

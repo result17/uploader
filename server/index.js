@@ -49,14 +49,17 @@ var _this = this;
 exports.__esModule = true;
 var express = require("express");
 var controller_1 = require("./controller");
+var bodyParser = require("body-parser");
 var app = express();
 var port = 4000;
 var corsHeader = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': '*'
+    'Access-Control-Allow-Headers': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT'
 };
 var controller = new controller_1["default"]();
 app.use(express.json());
+app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '1mb' }));
 app.options('*', function (req, res) {
     res.set(__assign({}, corsHeader));
     res.status(200).end();
@@ -86,12 +89,12 @@ app.post('/merge', function (req, res) { return __awaiter(_this, void 0, void 0,
         }
     });
 }); });
-app.post('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
+app.put('/', function (req, res) { return __awaiter(_this, void 0, void 0, function () {
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 res.set(__assign({}, corsHeader));
-                return [4 /*yield*/, controller.handleFromData(req, res)];
+                return [4 /*yield*/, controller.handleUpload(req, res)];
             case 1:
                 _a.sent();
                 return [2 /*return*/];

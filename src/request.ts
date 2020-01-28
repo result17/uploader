@@ -1,19 +1,27 @@
 import axios, { AxiosResponse, AxiosError, CancelToken } from 'axios'
 
-interface Headers {
-  'content-type': string
+interface Params {
+  hash: string,
+  fileHash: string,
+  filename: string,
+  size: number,
 }
 
-export interface AxiosConfig {
+interface Headers {
+  'content-type': 'application/octet-stream' | 'application/json'
+}
+
+interface AxiosConfig {
   url: string,
-  method: 'get' | 'post',
-  headers?: Headers,
-  data?: string | FormData,
+  method: 'get' | 'post' | 'put',
+  headers: Headers,
+  data: string | Blob,
+  params?: Params
   onUploadProgress?: (progressEvent: any) => void,
   cancelToken?: CancelToken,
 }
 
-export function request(config: AxiosConfig): Promise<AxiosResponse | void> {
+function request(config: AxiosConfig): Promise<AxiosResponse | void> {
   return axios(config).catch(function (error: AxiosError): void {
     if (axios.isCancel(error)) {
       // console.log('canceled')
@@ -33,3 +41,5 @@ export function request(config: AxiosConfig): Promise<AxiosResponse | void> {
     }
   })
 }
+
+export { request, AxiosConfig, Params }

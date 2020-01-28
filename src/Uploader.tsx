@@ -5,7 +5,7 @@ import './Uploader.css'
 import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, formDataObj } from './global'
 import initState from './store'
 import reducer from './reducer'
-import { request } from './request'
+import { request, Params } from './request'
 import axios, { AxiosResponse } from 'axios'
 import { createFileChunk, verifyUpload, createUploadListNumAry, createResumUploadChunkAry, createRestNumAry } from './utils'
 
@@ -80,31 +80,28 @@ const Uploader: React.FC = ():React.ReactElement => {
   // 扫描临时文件夹，对于已经上传到文件夹的切片名通过服务器的JSON中的uploadedList，此时不再对切片进行上传
 async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, fileHash: string, uploadedList: Array<string> = []): Promise<void> {
   const willUploadChunkList: Array<ChunkData> = chunkDataList.filter(chunkData => !uploadedList.includes(chunkData.hash))
-  const requestFormDataList: Array<formDataObj> = willUploadChunkList.map(chunkData => {
-    const formData = new FormData()
-    formData.append('chunk', chunkData.chunk)
-    formData.append('hash', chunkData.hash)
-    // https://stackoverflow.com/questions/40349987/how-to-suppress-error-ts2533-object-is-possibly-null-or-undefined
-    formData.append('filename', container.file!.name)
-    formData.append('fileHash', fileHash)
-    return {
-      index: chunkData.index,
-      formData,
+  
+  const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = willUploadChunkList.map((uploadChunk, idx) => {
+    const params: Params = {
+      hash: uploadChunk.hash,
+      size: uploadChunk.size,
+      fileHash: uploadChunk.fileHash,
+      filename: container.file!.name,
     }
-  })
-  const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = requestFormDataList.map((formDataObj, idx) => {
     return request({
-      method: 'post',
+      method: 'put',
       url: 'http://localhost:4000',
-      data: formDataObj.formData,
-      onUploadProgress: createProgressHandler(formDataObj.index),
+      data: uploadChunk.chunk,
+      headers: { 'content-type': 'application/octet-stream' },
+      params: params,
+      onUploadProgress: createProgressHandler(uploadChunk.index),
       cancelToken: willUploadChunkList[idx].cancelToken,
     })
   })
   let pList = await Promise.all(requestFormDataPromiseList)
   // 取消axios请求pList中会有undefined
   if (!pList.includes(undefined)) {
-    await mergeRequest(state.container, fileHash)
+    // await mergeRequest(state.container, fileHash)
   }
 }
 
@@ -136,7 +133,7 @@ async function mergeRequest(container: Container, hash: string): Promise<void> {
     })
   })
   message.success("upload sucess!")
-  dispatch({type: 'uploadReset'})
+  setTimeout(() => dispatch({type: 'uploadReset'}), 2000)
 }
 
 async function handleResum() {
@@ -204,7 +201,6 @@ React.useEffect(() => {
             state.data!.length ?
              (state.data!.reduce((acc, cur) => acc += cur.size * cur.percentage, 0) / state.container.file!.size) | 0 : 0
            }
-           status={state.data!.length ? 'active' : 'normal'}
          />
        </div>
        <ButtonGroup>

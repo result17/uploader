@@ -16,6 +16,7 @@
   "scripts": {
     "server": "node server/index.js",
     "start": "react-scripts-ts start | node server/index.js",
+    "begin": "react-scripts-ts start",
     "build": "react-scripts-ts build",
     "test": "react-scripts-ts test --env=jsdom",
     "eject": "react-scripts-ts eject"
@@ -26,6 +27,7 @@
     "@types/fs-extra": "^8.0.1",
     "@types/multiparty": "0.0.32",
     "antd": "^3.26.7",
+    "body-parser": "^1.19.0",
     "fs-extra": "^8.1.0",
     "multiparty": "^4.2.1"
   }
