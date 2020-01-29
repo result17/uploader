@@ -31,37 +31,41 @@ function handleFileChange(curState: State, e: React.ChangeEvent<HTMLInputElement
         return curState
       }
   }
-  const pieces: number = calPieces(files[0].size)
+  const chunkSize: number = calchunkSize(files[0].size)
   return {
     ...initState,
     container: {
       ...initState.container,
       file: files[0],
-      pieces: pieces,
+      chunkSize: chunkSize,
     }
   }
 }
 
-function calPieces(size: number): number {
-  if (size > 1024 * 1024 * 1024) { 
-    // 1gb chrome同一域的并发连接数为6
-    return 30 
-  } else if (size > 1024 * 1024 * 512 && size <= 1024 * 1024 * 1024) {
-    // 512mb - 1gb
-    return 24 
-  } else if (size > 1024 * 1024 * 128 && size <= 1024 * 1024 * 512) {
-    return 12
-  } else if (size > 1024 * 1024 * 8 && size <= 1024 * 1024 * 128) {
-    return 9
+
+// 统一单位为byte，字节
+function calchunkSize(size: number): number {
+  if (size > 4294967296) { 
+    // 大于2gb 切片大小为50mb
+    return 52428800 
+  } else if (size > 536870912 && size <= 4294967296) {
+    // 512mb - 2gb 切片大小为24mb
+    return  25165824
+  } else if (size > 134217728 && size <= 536870912) {
+    // 128mb - 512mb 切片大小为12mb
+    return 12582912
+  } else if (size > 16777216 && size <= 134217728) {
+    // 16mb - 128mb 切片大小为6mb
+    return 6291456
   } else {
-    return 3
+    // 小于16mb 切片大小为1mb
+    return 1048576
   }
 }
 
 // 文件切片
-function createFileChunk(fileData: File, len: number): Array<BlobObj> {
+function createFileChunk(fileData: File, chunkSize: number): Array<BlobObj> {
   const fileChunkList: Array<BlobObj> = []
-  const chunkSize: number = Math.ceil(fileData.size / len)
   let cur: number = 0
   while (cur < fileData.size) {
     let next: number = cur + chunkSize
@@ -77,11 +81,10 @@ function createUploadListNumAry(uploadedList: Array<string>): Array<number> {
   return uploadedList.map(upload => parseInt(upload.replace(reg, '$1'))).sort((a, b) => a - b)
 }
 
-function createResumUploadChunkAry(fileData: File, uploadedNumAry: Array<number>, pieces: number): Array<BlobObj> {
-  const fileChunkList: Array<BlobObj> = []
-  const chunkSize: number = Math.ceil(fileData.size / pieces)
+function createResumUploadChunkAry(fileData: File, uploadedNumAry: Array<number>, chunkSize: number): Array<BlobObj> {
+  const fileChunkList: Array<BlobObj> = [], chunksLen: number = Math.ceil(fileData.size / chunkSize)
   let step: number = 0
-  while (step < pieces) {
+  while (step < chunksLen) {
     if (!uploadedNumAry.includes(step)) {
       let start: number = step * chunkSize, end: number = start + chunkSize
       fileChunkList.push({file: fileData.slice(start, end)})
@@ -118,9 +121,9 @@ function handleResumChunkPercentageUpdate(curState: State, numAry: Array<number>
   }
 }
 
-function createRestNumAry(ary: Array<number>, pieces: number): Array<number> {
+function createRestNumAry(ary: Array<number>, chunksLen: number): Array<number> {
   let rest: Array<number> = []
-  for (let i = 0; i < pieces; i++) {
+  for (let i = 0; i < chunksLen; i++) {
     if (!ary.includes(i)) {
       rest.push(i)
     }

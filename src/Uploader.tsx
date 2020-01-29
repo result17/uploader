@@ -34,7 +34,7 @@ const Uploader: React.FC = ():React.ReactElement => {
     const source = CancelToken.source()
 
     if (!state.container.file) return Promise.reject()
-    const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file, state.container.pieces)
+    const fileChunkList: Array<BlobObj> = createFileChunk(state.container.file, state.container.chunkSize)
     let hash: string = await calHash(fileChunkList)
     dispatch({type: 'updateHash', hash: hash})
     const { shouldUpload, uploadedList }= await verifyUpload(state.container.file.name, hash)
@@ -101,7 +101,7 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
   let pList = await Promise.all(requestFormDataPromiseList)
   // 取消axios请求pList中会有undefined
   if (!pList.includes(undefined)) {
-    // await mergeRequest(state.container, fileHash)
+    await mergeRequest(state.container, fileHash)
   }
 }
 
@@ -148,11 +148,11 @@ async function handleResum() {
   }
   // numAry为所有已经上传到服务器切片的编号数组
   const numAry: Array<number> = createUploadListNumAry(uploadedList as Array<string>)
-  const restNumAry: Array<number> = createRestNumAry(numAry, state.container.pieces)
+  const restNumAry: Array<number> = createRestNumAry(numAry, state.data!.length)
   // 更新恢复上传后切片的进度，已经上传的为100%，其余为0%
   dispatch({type: 'updateResumChunkPercentage', uploadedNumAry: numAry})
   // debugger
-  const resumUploadChunkAry: Array<BlobObj> = createResumUploadChunkAry(state.container.file as File, numAry, state.container.pieces)
+  const resumUploadChunkAry: Array<BlobObj> = createResumUploadChunkAry(state.container.file as File, numAry, state.container.chunkSize)
   const resumUploadChunkList: Array<ChunkData> = resumUploadChunkAry.map((chunk: BlobObj, idx: number) => {
     let chunkHash: string = `${state.container.hash}-${restNumAry[idx]}`
 

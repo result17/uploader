@@ -8,7 +8,7 @@ interface Container {
   file: File | null,
   hash: string,
   worker: Worker | undefined,
-  pieces: number,
+  chunkSize: number,
 }
 
 interface Action {

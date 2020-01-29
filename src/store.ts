@@ -5,7 +5,7 @@ const initState: State = {
     file: null,
     hash: '',
     worker: undefined,
-    pieces: 0,
+    chunkSize: 0,
   },
   hashPercentage: 0,
   data: [],

@@ -57,9 +57,10 @@ var corsHeader = {
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT'
 };
-var controller = new controller_1["default"]();
 app.use(express.json());
-app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '1mb' }));
+// 文件切片大小最大值为50mb
+app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '50mb' }));
+var controller = new controller_1["default"]();
 app.options('*', function (req, res) {
     res.set(__assign({}, corsHeader));
     res.status(200).end();
