@@ -20,5 +20,6 @@ npm script
 ## updata
 - 移除multipart，完全改用[XMLHttpRequest](https://developer.mozilla.org/zh-CN/docs/Web/API/XMLHttpRequest/Sending_and_Receiving_Binary_Data)，不再采用FormData进行上传二进制数据。
 - 更新文件切片策略，针对文件大小，选择不同的文件切片大小。
+- 使用nginx正向代理express应用，使http协议升级到http2.0，不足之处，可能是并发发起太多请求，使得传输速度大大减低。原本ubuntu-18.04.3的镜像在http1.1中只花80s左右，完成上传，但在http2.0要花费300s。也使得断点续传效率变低。（nginx配置可在server/h2.conf查看）。
 ## thanks
 感谢[yeyan1996](https://github.com/yeyan1996/file-upload)，让我模仿构建了此组件。他仓库还有一篇详细介绍的文章，感兴趣的同学可以前去浏览（虽然我没详细看过）。

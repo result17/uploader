@@ -49,13 +49,10 @@ interface ChunkData extends ChunkStoreData {
   cancelToken: CancelToken,
 }
 
-interface formDataObj {
-  formData: FormData,
-  index: number,
-}
-
 const WAIT = 'wait'
 const PAUSE = 'pause'
 const UPLOADING = 'uploading'
 
-export { BlobObj, Container, Action, State, VerifyUploadRes, ChunkData, ChunkStoreData, WAIT, PAUSE, UPLOADING, formDataObj }
+const baseURL = 'http://localhost:5000'
+
+export { BlobObj, Container, Action, State, VerifyUploadRes, ChunkData, ChunkStoreData, WAIT, PAUSE, UPLOADING, baseURL }

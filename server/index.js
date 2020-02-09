@@ -50,13 +50,18 @@ exports.__esModule = true;
 var express = require("express");
 var controller_1 = require("./controller");
 var bodyParser = require("body-parser");
+var path = require("path");
+var child_process_1 = require("child_process");
+var nginxPath = path.resolve('..', 'nginx');
+child_process_1.exec('nginx -c conf/h2.conf', { cwd: nginxPath });
 var app = express();
-var port = 4000;
+var port = 5000;
 var corsHeader = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT'
 };
+var uploadStart = 0;
 app.use(express.json());
 // 文件切片大小最大值为50mb
 app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '50mb' }));
@@ -82,6 +87,10 @@ app.post('/merge', function (req, res) { return __awaiter(_this, void 0, void 0,
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
+                if (uploadStart) {
+                    console.log("Totally spend " + Math.floor((Date.now() - uploadStart) / 1000) + " seconds");
+                    uploadStart = 0;
+                }
                 res.set(__assign({}, corsHeader));
                 return [4 /*yield*/, controller.handleMerge(req, res)];
             case 1:
@@ -95,6 +104,8 @@ app.put('/', function (req, res) { return __awaiter(_this, void 0, void 0, funct
         switch (_a.label) {
             case 0:
                 res.set(__assign({}, corsHeader));
+                if (!uploadStart)
+                    uploadStart = Date.now();
                 return [4 /*yield*/, controller.handleUpload(req, res)];
             case 1:
                 _a.sent();

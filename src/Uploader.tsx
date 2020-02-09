@@ -2,7 +2,7 @@ import { Progress, Button, message } from 'antd'
 import 'antd/dist/antd.css'
 import * as React from 'react'
 import './Uploader.css'
-import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, formDataObj } from './global'
+import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, baseURL } from './global'
 import initState from './store'
 import reducer from './reducer'
 import { request, Params } from './request'
@@ -90,7 +90,7 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
     }
     return request({
       method: 'put',
-      url: 'http://localhost:4000',
+      url: baseURL,
       data: uploadChunk.chunk,
       headers: { 'content-type': 'application/octet-stream' },
       params: params,
@@ -123,7 +123,7 @@ function createProgressHandler(index: number) {
 async function mergeRequest(container: Container, hash: string): Promise<void> {
   await request({
     method: 'post',
-    url: 'http://localhost:4000/merge',
+    url: `${baseURL}/merge`,
     headers: {
       'content-type': 'application/json'
     },

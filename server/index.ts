@@ -1,9 +1,14 @@
 import * as express from 'express'
 import Controller from './controller'
 import * as bodyParser from 'body-parser'
+import * as path from 'path'
+import { exec } from 'child_process'
+
+const nginxPath = path.resolve('..', 'nginx')
+exec('nginx -c conf/h2.conf', { cwd: nginxPath })
 
 const app: express.Application = express()
-const port: number = 4000
+const port: number = 5000
 
 interface CorsHeader {
   'Access-Control-Allow-Origin': '*',
@@ -16,6 +21,8 @@ const corsHeader: CorsHeader = {
   'Access-Control-Allow-Headers': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT',
 }
+
+let uploadStart: number = 0
 
 app.use(express.json())
 // 文件切片大小最大值为50mb
@@ -40,6 +47,10 @@ app.post('/verify', async (req, res) => {
 })
 
 app.post('/merge', async (req, res) => {
+  if (uploadStart) {
+    console.log(`Totally spend ${Math.floor((Date.now() - uploadStart) / 1000)} seconds`)
+    uploadStart = 0
+  }
   res.set({
     ...corsHeader,
   })
@@ -51,6 +62,7 @@ app.put('/', async (req, res) => {
   res.set({
     ...corsHeader,
   })
+  if (!uploadStart) uploadStart = Date.now()
   await controller.handleUpload(req, res)
   return
 })

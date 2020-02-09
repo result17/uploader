@@ -1,4 +1,4 @@
-import { State, BlobObj, ChunkStoreData, VerifyUploadRes } from './global'
+import { State, BlobObj, ChunkStoreData, VerifyUploadRes, baseURL } from './global'
 import { request, AxiosConfig } from './request'
 import { AxiosResponse } from 'axios'
 import initState from './store'
@@ -6,7 +6,7 @@ import initState from './store'
 async function verifyUpload(filename: string, fileHash: string): Promise<VerifyUploadRes> {
   let requestConfig: AxiosConfig = {
     method: 'post',
-    url: 'http://localhost:4000/verify',
+    url: `${baseURL}/verify`,
     headers: {
       "content-type": "application/json"
     },
