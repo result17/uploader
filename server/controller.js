@@ -1,9 +1,10 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -52,7 +53,7 @@ function mergeFileChunk(filePath, fileHash) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    chunkDir = UPLOAD_DIR + "\\" + fileHash;
+                    chunkDir = UPLOAD_DIR + "/" + fileHash;
                     return [4 /*yield*/, fse.readdir(chunkDir)
                         // 确保切片顺序
                     ];
@@ -61,13 +62,13 @@ function mergeFileChunk(filePath, fileHash) {
                     // 确保切片顺序
                     chunkPathAry.sort();
                     // 创建文件
+                    console.log(filePath);
                     return [4 /*yield*/, fse.writeFile(filePath, '')];
                 case 2:
-                    // 创建文件
                     _a.sent();
                     chunkPathAry.forEach(function (chunk) {
-                        fse.appendFileSync(filePath, fse.readFileSync(chunkDir + "\\" + chunk));
-                        fse.unlinkSync(chunkDir + "\\" + chunk);
+                        fse.appendFileSync(filePath, fse.readFileSync(chunkDir + "/" + chunk));
+                        fse.unlinkSync(chunkDir + "/" + chunk);
                     });
                     fse.rmdirSync(chunkDir);
                     return [2 /*return*/];
@@ -81,8 +82,8 @@ function createdUploadedList(fileHash) {
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
-                    if (!fse.existsSync(UPLOAD_DIR + "\\" + fileHash)) return [3 /*break*/, 2];
-                    return [4 /*yield*/, fse.readdir(UPLOAD_DIR + "\\" + fileHash)];
+                    if (!fse.existsSync(UPLOAD_DIR + "/" + fileHash)) return [3 /*break*/, 2];
+                    return [4 /*yield*/, fse.readdir(UPLOAD_DIR + "/" + fileHash)];
                 case 1:
                     _a = _b.sent();
                     return [3 /*break*/, 3];
@@ -105,7 +106,7 @@ var Controller = /** @class */ (function () {
                     case 0:
                         data = req.body;
                         ext = extractExt(data.filename);
-                        filePath = UPLOAD_DIR + "\\" + data.fileHash + "." + ext;
+                        filePath = UPLOAD_DIR + "/" + data.fileHash + "." + ext;
                         if (!fse.existsSync(filePath)) return [3 /*break*/, 1];
                         res.end(JSON.stringify({
                             shouldUpload: false
@@ -137,9 +138,9 @@ var Controller = /** @class */ (function () {
                         hash = req.query.hash;
                         fileHash = req.query.fileHash;
                         filename = req.query.filename;
-                        chunkDir = UPLOAD_DIR + "\\" + fileHash;
-                        filePath = UPLOAD_DIR + "\\" + filename;
-                        chunkPath = chunkDir + "\\" + hash;
+                        chunkDir = UPLOAD_DIR + "/" + fileHash;
+                        filePath = UPLOAD_DIR + "/" + filename;
+                        chunkPath = chunkDir + "/" + hash;
                         // 文件存在直接返回
                         if (fse.existsSync(filePath)) {
                             res.end('file exist');
@@ -175,7 +176,7 @@ var Controller = /** @class */ (function () {
                         }));
                         data = req.body;
                         ext = extractExt(data.filename);
-                        filePath = UPLOAD_DIR + "\\" + data.fileHash + "." + ext;
+                        filePath = UPLOAD_DIR + "/" + data.fileHash + "." + ext;
                         return [4 /*yield*/, mergeFileChunk(filePath, data.fileHash)];
                     case 1:
                         _a.sent();

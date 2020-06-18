@@ -5,6 +5,7 @@ import './Uploader.css'
 import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, baseURL } from './global'
 import initState from './store'
 import reducer from './reducer'
+import pLimit from 'p-limit'
 import { request, Params } from './request'
 import axios, { AxiosResponse } from 'axios'
 import { createFileChunk, verifyUpload, createUploadListNumAry, createResumUploadChunkAry, createRestNumAry } from './utils'
@@ -80,7 +81,8 @@ const Uploader: React.FC = ():React.ReactElement => {
   // 扫描临时文件夹，对于已经上传到文件夹的切片名通过服务器的JSON中的uploadedList，此时不再对切片进行上传
 async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, fileHash: string, uploadedList: Array<string> = []): Promise<void> {
   const willUploadChunkList: Array<ChunkData> = chunkDataList.filter(chunkData => !uploadedList.includes(chunkData.hash))
-  
+
+  const limit = pLimit(3)
   const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = willUploadChunkList.map((uploadChunk, idx) => {
     const params: Params = {
       hash: uploadChunk.hash,
@@ -88,7 +90,7 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
       fileHash: uploadChunk.fileHash,
       filename: container.file!.name,
     }
-    return request({
+    return limit(() => request({
       method: 'put',
       url: baseURL,
       data: uploadChunk.chunk,
@@ -96,8 +98,9 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
       params: params,
       onUploadProgress: createProgressHandler(uploadChunk.index),
       cancelToken: willUploadChunkList[idx].cancelToken,
-    })
+    }))
   })
+  console.log('task begin')
   let pList = await Promise.all(requestFormDataPromiseList)
   // 取消axios请求pList中会有undefined
   if (!pList.includes(undefined)) {

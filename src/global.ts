@@ -53,6 +53,6 @@ const WAIT = 'wait'
 const PAUSE = 'pause'
 const UPLOADING = 'uploading'
 
-const baseURL = 'http://localhost:5000'
+const baseURL = 'https://localhost:80'
 
 export { BlobObj, Container, Action, State, VerifyUploadRes, ChunkData, ChunkStoreData, WAIT, PAUSE, UPLOADING, baseURL }
