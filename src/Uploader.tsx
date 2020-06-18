@@ -5,10 +5,11 @@ import './Uploader.css'
 import { Container, BlobObj, ChunkData, WAIT, PAUSE, UPLOADING, baseURL } from './global'
 import initState from './store'
 import reducer from './reducer'
-import pLimit from 'p-limit'
+import MyLimit from './myLimit'
 import { request, Params } from './request'
 import axios, { AxiosResponse } from 'axios'
 import { createFileChunk, verifyUpload, createUploadListNumAry, createResumUploadChunkAry, createRestNumAry } from './utils'
+
 
 const ButtonGroup = Button.Group
 
@@ -82,15 +83,16 @@ const Uploader: React.FC = ():React.ReactElement => {
 async function uploadChunks(container: Container, chunkDataList: Array<ChunkData>, fileHash: string, uploadedList: Array<string> = []): Promise<void> {
   const willUploadChunkList: Array<ChunkData> = chunkDataList.filter(chunkData => !uploadedList.includes(chunkData.hash))
 
-  const limit = pLimit(3)
-  const requestFormDataPromiseList: Array<Promise<AxiosResponse | void>> = willUploadChunkList.map((uploadChunk, idx) => {
+  const limit = new MyLimit(3)
+  willUploadChunkList.forEach((uploadChunk, idx) => {
     const params: Params = {
       hash: uploadChunk.hash,
       size: uploadChunk.size,
       fileHash: uploadChunk.fileHash,
       filename: container.file!.name,
     }
-    return limit(() => request({
+
+    limit.add(() => request({
       method: 'put',
       url: baseURL,
       data: uploadChunk.chunk,
@@ -101,7 +103,7 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
     }))
   })
   console.log('task begin')
-  let pList = await Promise.all(requestFormDataPromiseList)
+  let pList = await Promise.all(limit.tasks)
   // 取消axios请求pList中会有undefined
   if (!pList.includes(undefined)) {
     await mergeRequest(state.container, fileHash)

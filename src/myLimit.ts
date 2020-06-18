@@ -4,10 +4,10 @@ type PromiseFn<T> = () => Promise<T>
 
 class MyLimit {
   public concurrency: number = 1;
-  private queue: PromiseFn<any>[];
-  private tasksAry: Promise<any>[],
+  private queue: PromiseFn<any>[] = [];
+  private tasksAry: Promise<any>[] = [];
   public activeCount: number = 0;
-  constructor(concurrency: numebr) {
+  constructor(concurrency: number) {
     if (checkConcurrency(concurrency)) {
       this.concurrency = concurrency
     } else {
