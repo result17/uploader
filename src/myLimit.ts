@@ -18,7 +18,6 @@ class MyLimit {
   private limitToConcurrency(): void {
     Promise.resolve().then(() => {
       if (this.activeCount < this.concurrency && this.pendingCount > 0) {
-        this.activeCount++
         this.queue.shift()?.call(null)
       }
     })
@@ -26,11 +25,9 @@ class MyLimit {
 
   run(fn: PromiseFn<any>, resolve: (val: Promise<any>) => void): void {
     this.activeCount++
-
+    
     const task = fn()
-
     resolve(task)
-
     task.then(() => this.next())
   }
   

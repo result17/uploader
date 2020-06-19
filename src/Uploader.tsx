@@ -102,8 +102,9 @@ async function uploadChunks(container: Container, chunkDataList: Array<ChunkData
       cancelToken: willUploadChunkList[idx].cancelToken,
     }))
   })
-  console.log('task begin')
+  console.log('Tasks begin!')
   let pList = await Promise.all(limit.tasks)
+  console.log('Tasks end!')
   // 取消axios请求pList中会有undefined
   if (!pList.includes(undefined)) {
     await mergeRequest(state.container, fileHash)
